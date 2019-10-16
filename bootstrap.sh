@@ -17,6 +17,8 @@ echo export LC_ALL=C >> $HOME/.profile
 ifconfig
 cat /etc/resolv.conf
 
+git clone https://github.com/defanator/mcespi.git
+( cd mcespi && git checkout wip-ar71xx )
+
 git clone https://git.openwrt.org/openwrt/openwrt.git
-cd openwrt
-git checkout openwrt-18.06
+( cd openwrt && git checkout openwrt-18.06 )
