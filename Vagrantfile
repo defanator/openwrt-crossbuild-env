@@ -29,6 +29,10 @@ Vagrant.configure("2") do |config|
     source: "bootstrap.sh",
     destination: "/home/vagrant/bootstrap.sh"
 
+  config.vm.provision "file",
+    source: "motd",
+    destination: "/home/vagrant/motd"
+
   config.vm.provision "shell",
     path: "bootstrap.sh",
     privileged: false

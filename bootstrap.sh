@@ -13,6 +13,7 @@ tar Jvxf openwrt-sdk-18.06.1-ar71xx-generic_gcc-7.3.0_musl.Linux-x86_64.tar.xz
 echo export STAGING_DIR=\"$HOME/openwrt-sdk-18.06.1-ar71xx-generic_gcc-7.3.0_musl.Linux-x86_64/staging_dir\" >> $HOME/.profile
 echo PATH=\"$HOME/openwrt-sdk-18.06.1-ar71xx-generic_gcc-7.3.0_musl.Linux-x86_64/staging_dir/toolchain-mips_24kc_gcc-7.3.0_musl/bin:$PATH\" >> $HOME/.profile
 echo export LC_ALL=C >> $HOME/.profile
+echo unset LC_CTYPE >> $HOME/.profile
 
 ifconfig
 cat /etc/resolv.conf
@@ -22,3 +23,5 @@ git clone https://github.com/defanator/mcespi.git
 
 git clone https://git.openwrt.org/openwrt/openwrt.git
 ( cd openwrt && git checkout openwrt-18.06 )
+
+sudo mv motd /etc/

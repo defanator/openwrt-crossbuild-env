@@ -1,0 +1,12 @@
+
+To compile mcespi.ko, do the following:
+
+  cd openwrt
+  make menuconfig [ensure to enable crypto/md5 module here]
+  make target/linux/compile V=s
+  cp ~/mcespi/mcespi.c ./build_dir/target-mips_24kc_musl/linux-ar71xx_generic/linux-4.9.196/crypto/
+  sed -i -e 's,md5.o,md5.o\nobj-$(CONFIG_CRYPTO_MD5) += mcespi.o,' ./build_dir/target-mips_24kc_musl/linux-ar71xx_generic/linux-4.9.196/crypto/Makefile
+  make target/linux/compile V=s
+
+The mcespi.ko should appear in ./build_dir/target-mips_24kc_musl/linux-ar71xx_generic/linux-4.9.196/crypto.
+
