@@ -19,11 +19,16 @@ Vagrant.configure("2") do |config|
   config.vm.disk :disk, size: "15GB", primary: true
 
   config.vm.provider "virtualbox" do |vbox, override|
+    override.vm.box = "cloud-image/debian-13"
+    override.vm.provision "shell", inline: "sudo usermod -s /bin/bash vagrant", before: :all
     vbox.cpus = cpus
     vbox.memory = mem
+    vbox.customize ["modifyvm", :id, "--ioapic", "on"]
   end
 
   config.vm.provider :libvirt do |libvirt, override|
+    override.vm.box = "cloud-image/debian-13"
+    override.vm.provision "shell", inline: "sudo usermod -s /bin/bash vagrant", before: :all
     libvirt.cpus = cpus
     libvirt.memory = mem
     libvirt.driver = "kvm"
@@ -31,6 +36,7 @@ Vagrant.configure("2") do |config|
   end
 
   config.vm.provider "vmware_desktop" do |vmw, override|
+    override.vm.box = "defanator/debian-13"
     vmw.cpus = cpus
     vmw.memory = mem
     vmw.gui = false
@@ -54,6 +60,5 @@ Vagrant.configure("2") do |config|
     privileged: false
 
   config.vm.define "builder", autostart: true do |builder|
-    builder.vm.box = "defanator/debian-13"
   end
 end
