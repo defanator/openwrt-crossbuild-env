@@ -3,13 +3,15 @@
 
 Vagrant.configure("2") do |config|
   mem  = 1024
-  cpus = 2
   host = RbConfig::CONFIG['host_os']
 
+  # use one quarter of available cores, rounded down to an even number, capped at 2 CPUs (if available)
+  cores = `getconf _NPROCESSORS_ONLN`.to_i
+  cpus = [2, [(cores / 4) * 2, 1].max].min
+
   if host =~ /darwin/
-    mem = [4096, `sysctl -n hw.memsize`.to_i / 1024 / 1024 / 2].min
+    mem = [4096, `sysctl -n hw.memsize`.to_i / 1024 / 1024 / 2].max
   elsif host =~ /linux/
-    cpus = [2, `getconf _NPROCESSORS_ONLN`.to_i / 2].max
     mem = [cpus * 512, `awk '/MemTotal/ {print $2}' /proc/meminfo`.to_i / 1024 / 2].min
   end
 
@@ -25,6 +27,19 @@ Vagrant.configure("2") do |config|
     libvirt.cpu_mode = "host-passthrough"
   end
 
+  config.vm.provider "vmware_desktop" do |vmw, override|
+    vmw.cpus = cpus
+    vmw.memory = mem
+    vmw.gui = false
+    vmw.linked_clone = false
+  end
+
+  config.vm.disk :disk, size: "15GB", primary: true
+
+  config.vm.provision "file",
+    source: "Makefile",
+    destination: "/home/vagrant/Makefile"
+
   config.vm.provision "file",
     source: "bootstrap.sh",
     destination: "/home/vagrant/bootstrap.sh"
@@ -37,9 +52,7 @@ Vagrant.configure("2") do |config|
     path: "bootstrap.sh",
     privileged: false
 
-  config.vm.define "ubuntu1804", autostart: true do |ubuntu1804|
-    ubuntu1804.vm.box = "generic/ubuntu1804"
-    ubuntu1804.vm.network "private_network", type: "dhcp"
-    ubuntu1804.vm.synced_folder ".", "/vagrant", type: "nfs", nfs_version: 3
+  config.vm.define "builder", autostart: true do |builder|
+    builder.vm.box = "defanator/debian-13"
   end
 end
