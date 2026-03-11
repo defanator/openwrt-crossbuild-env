@@ -138,7 +138,8 @@ $(STAGING_DIR): | $(OPENWRT_SRCDIR) $(OPENWRT_SRCDIR)/feeds.conf $(OPENWRT_SRCDI
 	tar -Jvxf $(OPENWRT_SDK) --strip-components=1 -C $(OPENWRT_SRCDIR) --wildcards '*/staging_dir' ; \
 	toolchain_dir=$$(find $(STAGING_DIR)/ -type d -name "toolchain-*") ; \
 	cd $(OPENWRT_SRCDIR) ; \
-	./scripts/ext-toolchain.sh --toolchain $${toolchain_dir} --overwrite-config --config $(OPENWRT_TARGET)/$(OPENWRT_SUBTARGET) ; \
+	mkdir -p $${toolchain_dir}/stamp ; \
+	git log --format=%h -1 toolchain > $${toolchain_dir}/stamp/.ver_check ; \
 	}
 
 prepare: | $(STAGING_DIR) ## Fetch OpenWrt sources and toolchain
@@ -148,6 +149,7 @@ build-toolchain: $(OPENWRT_SRCDIR)/feeds.conf $(OPENWRT_SRCDIR)/.config ## Build
 	@{ \
 	set -ex ; \
 	cd $(OPENWRT_SRCDIR) ; \
+	time -p make defconfig ; \
 	time -p make tools/install -j $(NPROC) ; \
 	time -p make toolchain/install -j $(NPROC) ; \
 	}
@@ -157,6 +159,7 @@ build-kernel: $(OPENWRT_SRCDIR)/feeds.conf $(OPENWRT_SRCDIR)/.config ## Build Op
 	@{ \
 	set -ex ; \
 	cd $(OPENWRT_SRCDIR) ; \
+	time -p make defconfig ; \
 	time -p make V=s target/linux/compile -j $(NPROC) ; \
 	VERMAGIC=$$(cat ./build_dir/target-$(OPENWRT_ARCH)*/linux-$(OPENWRT_TARGET)_$(OPENWRT_SUBTARGET)/linux-*/.vermagic) ; \
 	echo "Vermagic: $${VERMAGIC}" ; \
