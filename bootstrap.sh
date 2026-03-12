@@ -3,9 +3,15 @@
 set -exo pipefail
 
 cd "${HOME}"
-echo "export LC_ALL=C" >> "${HOME}/.profile"
-echo "unset LC_CTYPE" >> "${HOME}/.profile"
-echo "eval \"\$(direnv hook bash)\"" >> "${HOME}/.profile"
+
+if ! grep -q -- "provisioned by vagrant" .profile >/dev/null; then
+    cat <<EOF >>.profile
+# provisioned by vagrant
+export LC_ALL=C
+unset LC_CTYPE
+eval "\$(direnv hook bash)"
+EOF
+fi
 
 sudo apt-get update
 sudo apt-get install --no-install-recommends --no-install-suggests -y \
@@ -33,7 +39,9 @@ sudo apt-get install --no-install-recommends --no-install-suggests -y \
 	zip \
 	zlib1g-dev
 
-git clone https://github.com/defanator/mcespi.git
-( cd mcespi && git checkout wip-ar71xx )
+if [ ! -d mcespi ]; then
+    git clone https://github.com/defanator/mcespi.git
+    ( cd mcespi && git checkout wip-ar71xx )
+fi
 
 sudo mv motd /etc/

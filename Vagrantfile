@@ -5,15 +5,17 @@ Vagrant.configure("2") do |config|
   mem  = 1024
   host = RbConfig::CONFIG['host_os']
 
-  # use one quarter of available cores, rounded down to an even number, capped at 2 CPUs (if available)
+  # use one quarter of available cores, rounded down to an even number
   cores_total = `getconf _NPROCESSORS_ONLN`.to_i
   cores_desired = [(cores_total / 4) & ~1, 2].max
   cpus = [cores_desired, cores_total].min
 
+  # use N*1Gb of RAM where N equals allocated number of CPU cores,
+  # or half of all available RAM (whichever is less)
   if host =~ /darwin/
-    mem = [4096, `sysctl -n hw.memsize`.to_i / 1024 / 1024 / 2].max
+    mem = [cpus * 1024, `sysctl -n hw.memsize`.to_i / 1024 / 1024 / 2].min
   elsif host =~ /linux/
-    mem = [cpus * 512, `awk '/MemTotal/ {print $2}' /proc/meminfo`.to_i / 1024 / 2].min
+    mem = [cpus * 1024, `awk '/MemTotal/ {print $2}' /proc/meminfo`.to_i / 1024 / 2].min
   end
 
   config.vm.disk :disk, size: "15GB", primary: true

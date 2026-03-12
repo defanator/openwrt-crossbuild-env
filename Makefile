@@ -39,12 +39,12 @@ OPENWRT_RELEASE_NUM := $(shell echo $(OPENWRT_RELEASE) | awk -F. '{printf "%02d%
 
 ifeq ($(_NEED_VERMAGIC), 1)
 ifeq ($(OPENWRT_RELEASE), snapshot)
-OPENWRT_VERMAGIC := $(shell curl -fs $(OPENWRT_MANIFEST) | grep -- "^kernel" | sed -e "s,.*\~,," | cut -d '-' -f 1)
+OPENWRT_VERMAGIC := $(shell curl -fsS $(OPENWRT_MANIFEST) | grep -- "^kernel" | sed -e "s,.*\~,," | cut -d '-' -f 1)
 else
 ifeq ($(shell [ $(OPENWRT_RELEASE_NUM) -ge 240000 ] && echo true || echo false), true)
-OPENWRT_VERMAGIC := $(shell curl -fs $(OPENWRT_MANIFEST) | grep -- "^kernel" | sed -e "s,.*\~,," | cut -d '-' -f 1)
+OPENWRT_VERMAGIC := $(shell curl -fsS $(OPENWRT_MANIFEST) | grep -- "^kernel" | sed -e "s,.*\~,," | cut -d '-' -f 1)
 else
-OPENWRT_VERMAGIC := $(shell curl -fs $(OPENWRT_MANIFEST) | grep -- "^kernel" | sed -e "s,.*\-,,")
+OPENWRT_VERMAGIC := $(shell curl -fsS $(OPENWRT_MANIFEST) | grep -- "^kernel" | sed -e "s,.*\-,,")
 endif
 endif
 endif
@@ -113,8 +113,8 @@ $(OPENWRT_SRCDIR):
 
 $(OPENWRT_SRCDIR)/feeds.conf: | $(OPENWRT_SRCDIR)
 	@{ \
-	set -ex ; \
-	curl -fsL $(OPENWRT_BASE_URL)/feeds.buildinfo | tee $@ ; \
+	set -exo pipefail ; \
+	curl -fsSL $(OPENWRT_BASE_URL)/feeds.buildinfo | tee $@ ; \
 	cd $(OPENWRT_SRCDIR) ; \
 	./scripts/feeds update -a ; \
 	./scripts/feeds install -a ; \
@@ -122,8 +122,8 @@ $(OPENWRT_SRCDIR)/feeds.conf: | $(OPENWRT_SRCDIR)
 
 $(OPENWRT_SRCDIR)/.config: | $(OPENWRT_SRCDIR)
 	@{ \
-	set -ex ; \
-	curl -fsL $(OPENWRT_BASE_URL)/config.buildinfo | tee $@ ; \
+	set -exo pipefail ; \
+	curl -fsSL $(OPENWRT_BASE_URL)/config.buildinfo | tee $@ ; \
 	}
 
 $(OPENWRT_SDK):
