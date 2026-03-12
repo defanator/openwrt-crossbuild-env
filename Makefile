@@ -15,6 +15,9 @@ OPENWRT_VERMAGIC  ?= auto
 
 OPENWRT_SNAPSHOT_REF ?= main
 
+# for generate-target-matrix
+OPENWRT_RELEASES ?= $(OPENWRT_RELEASE)
+
 ifneq ($(OPENWRT_RELEASE),snapshot)
 OPENWRT_ROOT_URL  ?= https://downloads.openwrt.org/releases
 OPENWRT_BASE_URL  ?= $(OPENWRT_ROOT_URL)/$(OPENWRT_RELEASE)/targets/$(OPENWRT_TARGET)/$(OPENWRT_SUBTARGET)
@@ -99,6 +102,16 @@ export-var-%:
 	}
 
 export-env: $(addprefix export-var-, $(SHOW_ENV_VARS)) ## Export environment
+
+.venv:
+	python3 -m venv $(TOPDIR)/.venv
+	$(TOPDIR)/.venv/bin/python3 -m pip install -r $(TOPDIR)/requirements.txt
+
+venv: .venv ## Create virtualenv
+
+.PHONY: generate-target-matrix
+generate-target-matrix: .venv ## Generate target matrix of build environments for GitHub CI
+	@printf "BUILD_MATRIX=%s" "$$($(TOPDIR)/.venv/bin/python3 $(TOPDIR)/ci/generate_target_matrix.py --config $(TOPDIR)/ci/target-matrix-config.yaml $(OPENWRT_RELEASES))"
 
 $(OPENWRT_SRCDIR):
 	@{ \
