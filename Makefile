@@ -13,6 +13,8 @@ OPENWRT_TARGET    ?= ath79
 OPENWRT_SUBTARGET ?= generic
 OPENWRT_VERMAGIC  ?= auto
 
+OPENWRT_SNAPSHOT_REF ?= main
+
 ifneq ($(OPENWRT_RELEASE),snapshot)
 OPENWRT_ROOT_URL  ?= https://downloads.openwrt.org/releases
 OPENWRT_BASE_URL  ?= $(OPENWRT_ROOT_URL)/$(OPENWRT_RELEASE)/targets/$(OPENWRT_TARGET)/$(OPENWRT_SUBTARGET)
