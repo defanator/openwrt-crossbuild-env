@@ -1,5 +1,7 @@
 #!/usr/bin/env make -f
 
+SHELL := /bin/bash -euo pipefail
+
 SELF := $(abspath $(lastword $(MAKEFILE_LIST)))
 TOPDIR := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
