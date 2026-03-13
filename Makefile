@@ -62,6 +62,9 @@ OPENWRT_SDK_URL := $(OPENWRT_BASE_URL)/$(OPENWRT_SDK)
 OPENWRT_TOOLCHAIN     := $(shell curl -fsS $(OPENWRT_BASE_URL)/ | sed -n 's/.*href="\(openwrt-toolchain-[^"]*\)".*/\1/p')
 OPENWRT_TOOLCHAIN_URL := $(OPENWRT_BASE_URL)/$(OPENWRT_TOOLCHAIN)
 
+DEPS := \
+	python3-setuptools
+
 help: ## Show help message (list targets)
 	@awk 'BEGIN {FS = ":.*##"; printf "\nTargets:\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}' $(SELF)
 
@@ -114,6 +117,11 @@ venv: .venv ## Create virtualenv
 .PHONY: generate-target-matrix
 generate-target-matrix: .venv ## Generate target matrix of build environments for GitHub CI
 	@printf "BUILD_MATRIX=%s" "$$($(TOPDIR)/.venv/bin/python3 $(TOPDIR)/ci/generate_target_matrix.py --config $(TOPDIR)/ci/target-matrix-config.yaml $(OPENWRT_RELEASES))"
+
+.PHONY: install-deps
+install-deps: ## Install dependencies
+	sudo apt-get update
+	sudo apt-get install --no-install-recommends --no-install-suggests -y $(DEPS)
 
 $(OPENWRT_SRCDIR):
 	@{ \

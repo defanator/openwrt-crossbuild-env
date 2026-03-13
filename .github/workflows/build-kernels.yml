@@ -68,6 +68,14 @@ jobs:
           ref: v${{ matrix.build_env.tag }}
           fetch-depth: 0
 
+      - name: install dependencies
+        id: install-deps
+        run: |
+          set -x
+          cd openwrt-crossbuild-env
+          make show-env
+          make install-deps
+
       - name: build kernel
         id: build-kernel
         env:
