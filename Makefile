@@ -63,7 +63,29 @@ OPENWRT_TOOLCHAIN     := $(shell curl -fsS $(OPENWRT_BASE_URL)/ | sed -n 's/.*hr
 OPENWRT_TOOLCHAIN_URL := $(OPENWRT_BASE_URL)/$(OPENWRT_TOOLCHAIN)
 
 DEPS := \
-	python3-setuptools
+	build-essential \
+	ca-certificates \
+	ccache \
+	direnv \
+	file \
+	flex \
+	gawk \
+	gcc \
+	gdb \
+	gettext \
+	git \
+	libncurses5-dev \
+	libssl-dev \
+	python3 \
+	python3-setuptools \
+	rsync \
+	subversion \
+	swig \
+	time \
+	unzip \
+	xsltproc \
+	zip \
+	zlib1g-dev
 
 help: ## Show help message (list targets)
 	@awk 'BEGIN {FS = ":.*##"; printf "\nTargets:\n"} /^[$$()% 0-9a-zA-Z_-]+:.*?##/ {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}' $(SELF)
@@ -122,6 +144,10 @@ generate-target-matrix: .venv ## Generate target matrix of build environments fo
 install-deps: ## Install dependencies
 	sudo apt-get update
 	sudo apt-get install --no-install-recommends --no-install-suggests -y $(DEPS)
+
+.PHONY: fix-host-symlinks
+fix-host-symlinks: ## Fix symlinks from staging_dir/host/bin
+	STAGING_DIR=$(STAGING_DIR) $(TOPDIR)/ci/fix-host-symlinks.sh
 
 $(OPENWRT_SRCDIR):
 	@{ \

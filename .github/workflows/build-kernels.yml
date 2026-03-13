@@ -68,14 +68,6 @@ jobs:
           ref: v${{ matrix.build_env.tag }}
           fetch-depth: 0
 
-      - name: install dependencies
-        id: install-deps
-        run: |
-          set -x
-          cd openwrt-crossbuild-env
-          make show-env
-          make install-deps
-
       - name: build kernel
         id: build-kernel
         env:
@@ -86,4 +78,5 @@ jobs:
           make show-env
           make export-env >> "$GITHUB_OUTPUT"
           time -p make prepare
+          time -p make fix-host-symlinks
           time -p make build-kernel
