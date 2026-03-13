@@ -152,7 +152,7 @@ $(OPENWRT_TOOLCHAIN):
 $(STAGING_DIR): | $(OPENWRT_SRCDIR) $(OPENWRT_SRCDIR)/feeds.conf $(OPENWRT_SRCDIR)/.config $(OPENWRT_SDK)
 	@{ \
 	set -ex ; \
-	tar -Jvxf $(OPENWRT_SDK) --strip-components=1 -C $(OPENWRT_SRCDIR) --wildcards '*/staging_dir' ; \
+	tar -xf $(OPENWRT_SDK) --strip-components=1 -C $(OPENWRT_SRCDIR) --wildcards '*/staging_dir' ; \
 	toolchain_dir=$$(find $(STAGING_DIR)/ -type d -name "toolchain-*") ; \
 	cd $(OPENWRT_SRCDIR) ; \
 	mkdir -p $${toolchain_dir}/stamp ; \
