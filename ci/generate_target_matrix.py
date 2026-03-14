@@ -93,11 +93,21 @@ class OpenWrtBuildInfoFetcher:
         _jobs = []
         for target, subtargets in self.targets.items():
             for subtarget in subtargets:
+                # fetch both packages directory index and index.json for each target/subtarget
                 _jobs.append(
                     {
                         "target": target,
                         "subtarget": subtarget,
                         "url": f"{target}/{subtarget}/packages/",
+                        "type": "packages"
+                    }
+                )
+                _jobs.append(
+                    {
+                        "target": target,
+                        "subtarget": subtarget,
+                        "url": f"{target}/{subtarget}/packages/index.json",
+                        "type": "index"
                     }
                 )
 
@@ -105,36 +115,65 @@ class OpenWrtBuildInfoFetcher:
 
         logger.info("parsing details")
 
-        for i, _ in enumerate(_jobs):
-            target = _jobs[i]["target"]
-            subtarget = _jobs[i]["subtarget"]
+        # group responses by target/subtarget for easier processing
+        target_data = {}
+        for i, job in enumerate(_jobs):
+            target = job["target"]
+            subtarget = job["subtarget"]
+            job_type = job["type"]
 
-            # BeautifulSoup solution (commented below) takes a while, so use plain regex here
-            packages = re.findall(r'href="(kernel[_-].*[ia]pk)"', res[i])
-            logger.debug("kernel packages found: %s", packages)
-            for package in packages:
-                logger.debug("%s/%s: found kernel: %s", target, subtarget, package)
+            key = f"{target}/{subtarget}"
+            if key not in target_data:
+                target_data[key] = {"target": target, "subtarget": subtarget}
 
-                # regular (release) builds
-                m = re.match(
-                    r"kernel_\d+\.\d+\.\d+(?:-\d+)?[-~]([a-f0-9]+)(?:-r\d+)?_([a-zA-Z0-9_-]+)\.ipk$",
-                    package,
-                )
-                if m:
-                    self.targets[target][subtarget]["vermagic"] = m.group(1)
-                    self.targets[target][subtarget]["pkgarch"] = m.group(2)
-                    break
+            target_data[key][job_type] = res[i]
 
-                # snapshot builds
-                m = re.match(
-                    r"kernel-\d+\.\d+\.\d+(?:-\d+)?[-~]([a-f0-9]+)(?:-r\d+)\.apk$",
-                    package,
-                )
-                if m:
-                    self.targets[target][subtarget]["vermagic"] = m.group(1)
-                    # TODO: figure out how to populate this correctly
-                    self.targets[target][subtarget]["pkgarch"] = "none"
-                    break
+        # process each target/subtarget combination
+        for key, data in target_data.items():
+            target = data["target"]
+            subtarget = data["subtarget"]
+
+            # try to extract architecture from index.json
+            pkgarch_from_json = None
+            if "index" in data:
+                try:
+                    index_data = json.loads(data["index"])
+                    pkgarch_from_json = index_data.get("architecture")
+                    if pkgarch_from_json:
+                        logger.debug("%s/%s: extracted architecture from index.json: %s", target, subtarget, pkgarch_from_json)
+                except (json.JSONDecodeError, KeyError) as e:
+                    logger.debug("%s/%s: failed to parse index.json: %s", target, subtarget, e)
+
+            # parse packages directory for vermagic and fallback pkgarch
+            if "packages" in data:
+                # BeautifulSoup solution (commented below) takes a while, so use plain regex here
+                packages = re.findall(r'href="(kernel[_-].*[ia]pk)"', data["packages"])
+                logger.debug("kernel packages found: %s", packages)
+
+                for package in packages:
+                    logger.debug("%s/%s: found kernel: %s", target, subtarget, package)
+
+                    # regular (release) builds
+                    m = re.match(
+                        r"kernel_\d+\.\d+\.\d+(?:-\d+)?[-~]([a-f0-9]+)(?:-r\d+)?_([a-zA-Z0-9_-]+)\.ipk$",
+                        package,
+                    )
+                    if m:
+                        self.targets[target][subtarget]["vermagic"] = m.group(1)
+                        # use JSON architecture if available, otherwise fall back to filename
+                        self.targets[target][subtarget]["pkgarch"] = pkgarch_from_json or m.group(2)
+                        break
+
+                    # snapshot / OpenWrt 25.12.0+ builds
+                    m = re.match(
+                        r"kernel-\d+\.\d+\.\d+(?:-\d+)?[-~]([a-f0-9]+)(?:-r\d+)\.apk$",
+                        package,
+                    )
+                    if m:
+                        self.targets[target][subtarget]["vermagic"] = m.group(1)
+                        # use JSON architecture if available, otherwise fall back to "none"
+                        self.targets[target][subtarget]["pkgarch"] = pkgarch_from_json or "none"
+                        break
 
             # s = BeautifulSoup(res[i], 'html.parser')
             # for element in s.select('a'):
