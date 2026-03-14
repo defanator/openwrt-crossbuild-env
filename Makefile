@@ -10,9 +10,9 @@ OPENWRT_SRCDIR   ?= $(TOPDIR)/openwrt
 STAGING_DIR      := $(OPENWRT_SRCDIR)/staging_dir
 
 OPENWRT_RELEASE   ?= 23.05.3
-OPENWRT_ARCH      ?= mips_24kc
 OPENWRT_TARGET    ?= ath79
 OPENWRT_SUBTARGET ?= generic
+OPENWRT_ARCH      ?= auto
 OPENWRT_VERMAGIC  ?= auto
 
 OPENWRT_RELEASE_NUM := $(shell echo $(OPENWRT_RELEASE) | awk -F. '{printf "%02d%02d%02d", $$1, $$2, $$3}')
@@ -58,6 +58,18 @@ else
 OPENWRT_VERMAGIC := $(shell curl -fsS $(OPENWRT_MANIFEST) | grep -- "^kernel" | sed -e "s,.*\-,,")
 endif
 endif
+endif
+
+ifndef OPENWRT_ARCH
+_NEED_ARCH=1
+endif
+
+ifeq ($(OPENWRT_ARCH), auto)
+_NEED_ARCH=1
+endif
+
+ifeq ($(_NEED_VERMAGIC), 1)
+OPENWRT_ARCH := $(shell curl -fsS $(OPENWRT_BASE_URL)/packages/index.json | jq -r '.architecture')
 endif
 
 OPENWRT_SDK     := $(shell curl -fsS $(OPENWRT_BASE_URL)/ | sed -n 's/.*href="\(openwrt-sdk-[^"]*\)".*/\1/p')
