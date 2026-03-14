@@ -22,7 +22,7 @@ jobs:
       OPENWRT_RELEASES: ${{ inputs.openwrt_versions || vars.DEFAULT_OPENWRT_VERSIONS }}
     steps:
       - name: checkout build env
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -55,13 +55,13 @@ jobs:
 
     steps:
       - name: checkout build env
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: openwrt-crossbuild-env
           fetch-depth: 0
 
       - name: checkout openwrt
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: openwrt
           repository: openwrt/openwrt

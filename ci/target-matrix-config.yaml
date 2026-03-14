@@ -31,6 +31,12 @@
   mediatek:
     - filogic
 
+25.12.0:
+  ath79:
+    - generic
+  mediatek:
+    - filogic
+
 # snapshot builds use newer package format (.apk vs .ipk)
 snapshot:
   ath79: ["generic"]

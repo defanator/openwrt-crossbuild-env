@@ -15,6 +15,8 @@ OPENWRT_TARGET    ?= ath79
 OPENWRT_SUBTARGET ?= generic
 OPENWRT_VERMAGIC  ?= auto
 
+OPENWRT_RELEASE_NUM := $(shell echo $(OPENWRT_RELEASE) | awk -F. '{printf "%02d%02d%02d", $$1, $$2, $$3}')
+
 OPENWRT_SNAPSHOT_REF ?= main
 
 # for generate-target-matrix
@@ -24,7 +26,11 @@ ifneq ($(OPENWRT_RELEASE),snapshot)
 OPENWRT_ROOT_URL  ?= https://downloads.openwrt.org/releases
 OPENWRT_BASE_URL  ?= $(OPENWRT_ROOT_URL)/$(OPENWRT_RELEASE)/targets/$(OPENWRT_TARGET)/$(OPENWRT_SUBTARGET)
 OPENWRT_MANIFEST  ?= $(OPENWRT_BASE_URL)/openwrt-$(OPENWRT_RELEASE)-$(OPENWRT_TARGET)-$(OPENWRT_SUBTARGET).manifest
+ifeq ($(shell [ $(OPENWRT_RELEASE_NUM) -ge 251200 ] && echo true || echo false), true)
+OPENWRT_PKG_EXT   := .apk
+else
 OPENWRT_PKG_EXT   := .ipk
+endif
 else
 OPENWRT_ROOT_URL  ?= https://downloads.openwrt.org/snapshots
 OPENWRT_BASE_URL  ?= $(OPENWRT_ROOT_URL)/targets/$(OPENWRT_TARGET)/$(OPENWRT_SUBTARGET)
@@ -41,8 +47,6 @@ endif
 ifeq ($(OPENWRT_VERMAGIC), auto)
 _NEED_VERMAGIC=1
 endif
-
-OPENWRT_RELEASE_NUM := $(shell echo $(OPENWRT_RELEASE) | awk -F. '{printf "%02d%02d%02d", $$1, $$2, $$3}')
 
 ifeq ($(_NEED_VERMAGIC), 1)
 ifeq ($(OPENWRT_RELEASE), snapshot)
