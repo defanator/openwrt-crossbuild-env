@@ -90,10 +90,12 @@ DEPS := \
 	gdb \
 	gettext \
 	git \
+	jq \
 	libncurses5-dev \
 	libssl-dev \
 	python3 \
 	python3-setuptools \
+	python3-venv \
 	rsync \
 	subversion \
 	swig \
@@ -209,7 +211,7 @@ $(STAGING_DIR): | $(OPENWRT_SRCDIR) $(OPENWRT_SRCDIR)/feeds.conf $(OPENWRT_SRCDI
 	git log --format=%h -1 toolchain > $${toolchain_dir}/stamp/.ver_check ; \
 	}
 
-prepare: | $(STAGING_DIR) ## Fetch OpenWrt sources and toolchain
+prepare: | $(STAGING_DIR) ## Fetch OpenWrt sources and SDK / toolchain
 
 .PHONY: build-toolchain
 build-toolchain: $(OPENWRT_SRCDIR)/feeds.conf $(OPENWRT_SRCDIR)/.config ## Build OpenWrt toolchain

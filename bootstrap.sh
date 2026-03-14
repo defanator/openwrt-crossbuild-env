@@ -26,10 +26,12 @@ sudo apt-get install --no-install-recommends --no-install-suggests -y \
 	gdb \
 	gettext \
 	git \
+	jq \
 	libncurses5-dev \
 	libssl-dev \
 	python3 \
 	python3-setuptools \
+	python3-venv \
 	rsync \
 	subversion \
 	swig \

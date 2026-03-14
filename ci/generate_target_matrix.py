@@ -99,7 +99,7 @@ class OpenWrtBuildInfoFetcher:
                         "target": target,
                         "subtarget": subtarget,
                         "url": f"{target}/{subtarget}/packages/",
-                        "type": "packages"
+                        "type": "packages",
                     }
                 )
                 _jobs.append(
@@ -107,7 +107,7 @@ class OpenWrtBuildInfoFetcher:
                         "target": target,
                         "subtarget": subtarget,
                         "url": f"{target}/{subtarget}/packages/index.json",
-                        "type": "index"
+                        "type": "index",
                     }
                 )
 
@@ -140,9 +140,16 @@ class OpenWrtBuildInfoFetcher:
                     index_data = json.loads(data["index"])
                     pkgarch_from_json = index_data.get("architecture")
                     if pkgarch_from_json:
-                        logger.debug("%s/%s: extracted architecture from index.json: %s", target, subtarget, pkgarch_from_json)
+                        logger.debug(
+                            "%s/%s: extracted architecture from index.json: %s",
+                            target,
+                            subtarget,
+                            pkgarch_from_json,
+                        )
                 except (json.JSONDecodeError, KeyError) as e:
-                    logger.debug("%s/%s: failed to parse index.json: %s", target, subtarget, e)
+                    logger.debug(
+                        "%s/%s: failed to parse index.json: %s", target, subtarget, e
+                    )
 
             # parse packages directory for vermagic and fallback pkgarch
             if "packages" in data:
@@ -161,7 +168,9 @@ class OpenWrtBuildInfoFetcher:
                     if m:
                         self.targets[target][subtarget]["vermagic"] = m.group(1)
                         # use JSON architecture if available, otherwise fall back to filename
-                        self.targets[target][subtarget]["pkgarch"] = pkgarch_from_json or m.group(2)
+                        self.targets[target][subtarget]["pkgarch"] = (
+                            pkgarch_from_json or m.group(2)
+                        )
                         break
 
                     # snapshot / OpenWrt 25.12.0+ builds
@@ -172,7 +181,9 @@ class OpenWrtBuildInfoFetcher:
                     if m:
                         self.targets[target][subtarget]["vermagic"] = m.group(1)
                         # use JSON architecture if available, otherwise fall back to "none"
-                        self.targets[target][subtarget]["pkgarch"] = pkgarch_from_json or "none"
+                        self.targets[target][subtarget]["pkgarch"] = (
+                            pkgarch_from_json or "none"
+                        )
                         break
 
             # s = BeautifulSoup(res[i], 'html.parser')
