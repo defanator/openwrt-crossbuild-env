@@ -25,6 +25,8 @@ Vagrant.configure("2") do |config|
     mem = [cpus * 1024, `awk '/MemTotal/ {print $2}' /proc/meminfo`.to_i / 1024 / 2].min
   end
 
+  config.ssh.forward_agent = true
+
   config.vm.disk :disk, size: "15GB", primary: true
 
   config.vm.provider "virtualbox" do |vbox, override|

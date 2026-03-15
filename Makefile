@@ -5,9 +5,7 @@ SHELL := /bin/bash -euo pipefail
 SELF := $(abspath $(lastword $(MAKEFILE_LIST)))
 TOPDIR := $(realpath $(dir $(abspath $(lastword $(MAKEFILE_LIST)))))
 
-OPENWRT_REMOTE   ?= https://github.com/openwrt/openwrt.git
-OPENWRT_SRCDIR   ?= $(TOPDIR)/openwrt
-STAGING_DIR      := $(OPENWRT_SRCDIR)/staging_dir
+OPENWRT_REMOTE ?= https://github.com/openwrt/openwrt.git
 
 OPENWRT_RELEASE   ?= 23.05.3
 OPENWRT_TARGET    ?= ath79
@@ -18,6 +16,9 @@ OPENWRT_VERMAGIC  ?= auto
 OPENWRT_RELEASE_NUM := $(shell echo $(OPENWRT_RELEASE) | awk -F. '{printf "%02d%02d%02d", $$1, $$2, $$3}')
 
 OPENWRT_SNAPSHOT_REF ?= main
+
+OPENWRT_SRCDIR ?= $(TOPDIR)/openwrt-$(OPENWRT_RELEASE)-$(OPENWRT_TARGET)-$(OPENWRT_SUBTARGET)
+STAGING_DIR    := $(OPENWRT_SRCDIR)/staging_dir
 
 # for generate-target-matrix
 OPENWRT_RELEASES ?= $(OPENWRT_RELEASE)
@@ -237,3 +238,7 @@ build-kernel: $(OPENWRT_SRCDIR)/feeds.conf $(OPENWRT_SRCDIR)/.config ## Build Op
 		exit 1 ; \
 	fi ; \
 	}
+
+.PHONY: up
+up: ## Set up Vagrant environment
+	vagrant up
