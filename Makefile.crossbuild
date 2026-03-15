@@ -80,14 +80,14 @@ OPENWRT_SDK_URL := $(OPENWRT_BASE_URL)/$(OPENWRT_SDK)
 OPENWRT_TOOLCHAIN     := $(shell curl -fsS $(OPENWRT_BASE_URL)/ | sed -n 's/.*href="\(openwrt-toolchain-[^"]*\)".*/\1/p')
 OPENWRT_TOOLCHAIN_URL := $(OPENWRT_BASE_URL)/$(OPENWRT_TOOLCHAIN)
 
-.venv:
+$(_TOPDIR)/.venv:
 	python3 -m venv $(_TOPDIR)/.venv
 	$(_TOPDIR)/.venv/bin/python3 -m pip install -r $(_TOPDIR)/requirements.txt
 
-venv: .venv ## Create virtualenv
+openwrt-crossbuild-env-venv: $(_TOPDIR)/.venv ## Create virtualenv
 
 .PHONY: generate-target-matrix
-generate-target-matrix: .venv ## Generate target matrix of build environments for GitHub CI
+generate-target-matrix: $(_TOPDIR)/.venv ## Generate target matrix of build environments for GitHub CI
 	@printf "BUILD_MATRIX=%s" "$$($(_TOPDIR)/.venv/bin/python3 $(_TOPDIR)/ci/generate_target_matrix.py --config $(_TOPDIR)/ci/target-matrix-config.yaml $(OPENWRT_RELEASES))"
 
 .PHONY: fix-host-symlinks
