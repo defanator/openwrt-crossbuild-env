@@ -3,7 +3,7 @@
 
 $bootstrap_script = <<-'EOF'
 set -ex
-cp -r /vagrant/Makefile /vagrant/bootstrap.sh /vagrant/ci /vagrant/motd /vagrant/requirements.txt /home/vagrant/
+cp -r /vagrant/Makefile /vagrant/Makefile.crossbuild /vagrant/bootstrap.sh /vagrant/ci /vagrant/motd /vagrant/requirements.txt /home/vagrant/
 /home/vagrant/bootstrap.sh
 make venv
 EOF
