@@ -30,7 +30,7 @@ jobs:
         id: prepare-virtualenv
         run: |
           make show-env
-          make venv
+          make openwrt-crossbuild-env-venv
 
       - name: generate target matrix
         id: generate-target-matrix
