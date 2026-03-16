@@ -14,6 +14,12 @@ while read -r link; do
             rm -f "$link"
             ln -s "$dst" "$link"
             ;;
+        gcc|g++)
+            dst="/usr/bin/$bn"
+            echo "relinking $link to $dst"
+            rm -f "$link"
+            ln -s "$dst" "$link"
+            ;;
         xxd)
             dst="/usr/bin/xxd"
             echo "relinking $link to $dst"
