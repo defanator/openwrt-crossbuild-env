@@ -5,7 +5,7 @@ $bootstrap_script = <<-'EOF'
 set -ex
 cp -r /vagrant/Makefile /vagrant/Makefile.crossbuild /vagrant/bootstrap.sh /vagrant/ci /vagrant/motd /vagrant/requirements.txt /home/vagrant/
 /home/vagrant/bootstrap.sh
-make venv
+make openwrt-crossbuild-env-venv
 EOF
 
 Vagrant.configure("2") do |config|
