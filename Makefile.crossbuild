@@ -25,6 +25,7 @@ STAGING_DIR    := $(OPENWRT_SRCDIR)/staging_dir
 
 # for generate-target-matrix
 OPENWRT_RELEASES ?= $(OPENWRT_RELEASE)
+OPENWRT_TARGET_MATRIX_CONFIG ?= $(_TOPDIR)/ci/target-matrix-config.yaml
 
 ifneq ($(OPENWRT_RELEASE),snapshot)
 OPENWRT_ROOT_URL  ?= https://downloads.openwrt.org/releases
@@ -88,7 +89,7 @@ openwrt-crossbuild-env-venv: $(_TOPDIR)/.venv ## Create virtualenv
 
 .PHONY: generate-target-matrix
 generate-target-matrix: $(_TOPDIR)/.venv ## Generate target matrix of build environments for GitHub CI
-	@printf "BUILD_MATRIX=%s" "$$($(_TOPDIR)/.venv/bin/python3 $(_TOPDIR)/ci/generate_target_matrix.py --config $(_TOPDIR)/ci/target-matrix-config.yaml $(OPENWRT_RELEASES))"
+	@printf "BUILD_MATRIX=%s" "$$($(_TOPDIR)/.venv/bin/python3 $(_TOPDIR)/ci/generate_target_matrix.py --config $(OPENWRT_TARGET_MATRIX_CONFIG) $(OPENWRT_RELEASES))"
 
 .PHONY: fix-host-symlinks
 fix-host-symlinks: ## Fix symlinks from staging_dir/host/bin
