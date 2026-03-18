@@ -71,7 +71,7 @@ ifeq ($(OPENWRT_ARCH), auto)
 _NEED_ARCH=1
 endif
 
-ifeq ($(_NEED_VERMAGIC), 1)
+ifeq ($(_NEED_ARCH), 1)
 OPENWRT_ARCH := $(shell curl -fsS $(OPENWRT_BASE_URL)/packages/index.json | jq -r '.architecture')
 endif
 
@@ -89,7 +89,7 @@ openwrt-crossbuild-env-venv: $(_TOPDIR)/.venv ## Create virtualenv
 
 .PHONY: generate-target-matrix
 generate-target-matrix: $(_TOPDIR)/.venv ## Generate target matrix of build environments for GitHub CI
-	@printf "BUILD_MATRIX=%s" "$$($(_TOPDIR)/.venv/bin/python3 $(_TOPDIR)/ci/generate_target_matrix.py --config $(OPENWRT_TARGET_MATRIX_CONFIG) $(OPENWRT_RELEASES))"
+	@printf "BUILD_MATRIX=%s\n" "$$($(_TOPDIR)/.venv/bin/python3 $(_TOPDIR)/ci/generate_target_matrix.py --config $(OPENWRT_TARGET_MATRIX_CONFIG) $(OPENWRT_RELEASES))"
 
 .PHONY: fix-host-symlinks
 fix-host-symlinks: ## Fix symlinks from staging_dir/host/bin
