@@ -1,7 +1,6 @@
 name: build kernels
 
 on:
-  push:
   pull_request:
     branches:
       - master
