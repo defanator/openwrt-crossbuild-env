@@ -1,0 +1,84 @@
+name: build kernels
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      openwrt_versions:
+        description: "OpenWrt version(s)"
+        type: string
+        required: true
+        default: "25.12.0 24.10.5 23.05.3"
+
+jobs:
+  generate-target-matrix:
+    runs-on: ubuntu-24.04
+    outputs:
+      build-matrix: ${{ steps.generate-target-matrix.outputs.BUILD_MATRIX }}
+    env:
+      OPENWRT_RELEASES: ${{ inputs.openwrt_versions || vars.DEFAULT_OPENWRT_VERSIONS }}
+    steps:
+      - name: checkout build env
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: prepare virtualenv
+        id: prepare-virtualenv
+        run: |
+          make show-env
+          make openwrt-crossbuild-env-venv
+
+      - name: generate target matrix
+        id: generate-target-matrix
+        run: |
+          make generate-target-matrix >> "$GITHUB_OUTPUT"
+
+  build:
+    name: "v${{ matrix.build_env.tag }} - ${{ matrix.build_env.pkgarch }} :: ${{ matrix.build_env.target }}/${{ matrix.build_env.subtarget }} kernel build"
+    runs-on: ubuntu-24.04
+    needs: generate-target-matrix
+    strategy:
+      fail-fast: false
+      matrix:
+        build_env: ${{ fromJson(needs.generate-target-matrix.outputs.build-matrix) }}
+
+    env:
+      OPENWRT_RELEASE: ${{ matrix.build_env.tag }}
+      OPENWRT_ARCH: ${{ matrix.build_env.pkgarch }}
+      OPENWRT_TARGET: ${{ matrix.build_env.target }}
+      OPENWRT_SUBTARGET: ${{ matrix.build_env.subtarget }}
+      OPENWRT_VERMAGIC: ${{ matrix.build_env.vermagic }}
+
+    steps:
+      - name: checkout build env
+        uses: actions/checkout@v6
+        with:
+          path: openwrt-crossbuild-env
+          fetch-depth: 0
+
+      - name: checkout openwrt
+        uses: actions/checkout@v6
+        with:
+          path: openwrt
+          repository: openwrt/openwrt
+          ref: v${{ matrix.build_env.tag }}
+          fetch-depth: 0
+
+      - name: build kernel
+        id: build-kernel
+        env:
+          OPENWRT_SRCDIR: ../openwrt
+        run: |
+          set -x
+          cd openwrt-crossbuild-env
+          make show-env
+          make export-env >> "$GITHUB_OUTPUT"
+          time -p make prepare
+          time -p make fix-host-symlinks
+          time -p make build-kernel

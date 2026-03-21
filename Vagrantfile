@@ -1,6 +1,13 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+$bootstrap_script = <<-'EOF'
+set -ex
+cp -r /vagrant/Makefile /vagrant/Makefile.crossbuild /vagrant/bootstrap.sh /vagrant/ci /vagrant/motd /vagrant/requirements.txt /home/vagrant/
+/home/vagrant/bootstrap.sh
+make openwrt-crossbuild-env-venv
+EOF
+
 Vagrant.configure("2") do |config|
   mem  = 1024
   host = RbConfig::CONFIG['host_os']
@@ -17,6 +24,8 @@ Vagrant.configure("2") do |config|
   elsif host =~ /linux/
     mem = [cpus * 1024, `awk '/MemTotal/ {print $2}' /proc/meminfo`.to_i / 1024 / 2].min
   end
+
+  config.ssh.forward_agent = true
 
   config.vm.disk :disk, size: "15GB", primary: true
 
@@ -45,21 +54,7 @@ Vagrant.configure("2") do |config|
     vmw.linked_clone = false
   end
 
-  config.vm.provision "file",
-    source: "Makefile",
-    destination: "/home/vagrant/Makefile"
-
-  config.vm.provision "file",
-    source: "bootstrap.sh",
-    destination: "/home/vagrant/bootstrap.sh"
-
-  config.vm.provision "file",
-    source: "motd",
-    destination: "/home/vagrant/motd"
-
-  config.vm.provision "shell",
-    path: "bootstrap.sh",
-    privileged: false
+  config.vm.provision "shell", inline: $bootstrap_script, privileged: false
 
   config.vm.define "builder", autostart: true do |builder|
   end
