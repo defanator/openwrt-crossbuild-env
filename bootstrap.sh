@@ -75,8 +75,8 @@ fi
 
 if [ ! -f "${GITROOT}/openwrt-crossbuild-env/.envrc" ]; then
     cat <<EOF >"${GITROOT}/openwrt-crossbuild-env/.envrc"
-source_env /home/vagrant
-export _ROOT_SRCDIR=/home/vagrant/git
+source_env ${HOME}
+export _ROOT_SRCDIR=${GITROOT}
 EOF
     pushd "${GITROOT}/openwrt-crossbuild-env"
     direnv allow
