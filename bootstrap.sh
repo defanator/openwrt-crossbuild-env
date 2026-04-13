@@ -60,7 +60,7 @@ if [ ! -d "${GITROOT}/usign" ]; then
     mkdir build
     cd build
     cmake ..
-    make -j
+    make -j$(getconf _NPROCESSORS_ONLN)
     sudo install -m755 usign /usr/bin/
     popd
 fi
