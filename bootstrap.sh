@@ -83,4 +83,4 @@ EOF
     popd
 fi
 
-sudo mv "${GITROOT}/openwrt-crossbuild-env/motd" /etc/
+sudo install -m 644 "${GITROOT}/openwrt-crossbuild-env/motd" /etc/motd
