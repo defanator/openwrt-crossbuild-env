@@ -2,6 +2,8 @@
 
 set -exo pipefail
 
+GITROOT="${HOME}/git"
+
 cd "${HOME}"
 
 if ! grep -q -- "provisioned by vagrant" .profile >/dev/null; then
@@ -18,6 +20,7 @@ sudo apt-get install --no-install-recommends --no-install-suggests -y \
 	build-essential \
 	ca-certificates \
 	ccache \
+	cmake \
 	direnv \
 	file \
 	flex \
@@ -41,9 +44,43 @@ sudo apt-get install --no-install-recommends --no-install-suggests -y \
 	zip \
 	zlib1g-dev
 
-if [ ! -d mcespi ]; then
+mkdir -p "${GITROOT}"
+
+if [ ! -d "${GITROOT}/mcespi" ]; then
+    pushd "${GITROOT}"
     git clone https://github.com/defanator/mcespi.git
     ( cd mcespi && git checkout wip-ar71xx )
+    popd
 fi
 
-sudo mv motd /etc/
+if [ ! -d "${GITROOT}/usign" ]; then
+    pushd "${GITROOT}"
+    git clone https://github.com/openwrt/usign.git
+    cd usign
+    mkdir build
+    cd build
+    cmake ..
+    make -j$(getconf _NPROCESSORS_ONLN)
+    sudo install -m755 usign /usr/bin/
+    popd
+fi
+
+if [ ! -f "${HOME}/.envrc" ]; then
+    cat <<EOF >"${HOME}/.envrc"
+# use this to e.g. pull openwrt sources from single local clone instead of real upstream
+#export OPENWRT_REMOTE=/vagrant/openwrt
+EOF
+    direnv allow
+fi
+
+if [ ! -f "${GITROOT}/openwrt-crossbuild-env/.envrc" ]; then
+    cat <<EOF >"${GITROOT}/openwrt-crossbuild-env/.envrc"
+source_env ${HOME}
+export _ROOT_SRCDIR=${GITROOT}
+EOF
+    pushd "${GITROOT}/openwrt-crossbuild-env"
+    direnv allow
+    popd
+fi
+
+sudo install -m 644 "${GITROOT}/openwrt-crossbuild-env/motd" /etc/motd
