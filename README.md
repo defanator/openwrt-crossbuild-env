@@ -30,19 +30,19 @@ This repository provides a virtualized cross-compilation environment for OpenWrt
    ```
 
 4. Prepare build environment for a given OpenWrt release/target:
-   ```
+   ```bash
    make prepare
    make fix-host-symlinks
    ```
 
 5. Build OpenWrt kernel:
-   ```
+   ```bash
    make build-kernel
    ```
 
-Refer to [Makefile.crossbuild](Makefile.crossbuild) for `OPENWRT_*` variables available to select specific OpenWrt release and target configurations. The [direnv](https://direnv.net) could be handy to keep these variables under your building directory.
+Refer to [Makefile.crossbuild](Makefile.crossbuild) for `OPENWRT_*` variables available to select specific OpenWrt release and target configurations; [direnv](https://direnv.net) could be handy for setting and keeping these variables in your building directory.
 
-## Quick start - GitHub actions
+## Quick start - GitHub Actions
 
 Refer to the workflows of the following projects to see how this environment can be plugged in:
  - https://github.com/defanator/openwrt-loki-exporter
